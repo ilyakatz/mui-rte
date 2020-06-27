@@ -20,6 +20,15 @@ console.log("Content is ");
 console.log(content);
 console.log("plaintext is " + state.getPlainText());
 
+const storeRaw = localStorage.getItem('draftRaw');
+
+let initialEditorState =null;
+if (storeRaw) {
+  const rawContentFromStore = convertFromRaw(JSON.parse(storeRaw));
+  initialEditorState = EditorState.createWithContent(rawContentFromStore);
+} else {
+  initialEditorState = EditorState.createEmpty();
+}
 //////
 const raw: RawDraftContentState = convertToRaw(state);
 console.log("Raw is " + JSON.stringify(raw));
@@ -32,41 +41,23 @@ console.log("Text is " + text);
 // https://medium.com/@rajaraodv/how-draft-js-represents-rich-text-data-eeabb5f25cf2#9260
 
 const save = (data: string) => {
-  const a: RawDraftContentState = {
-    blocks: [
-      {
-        key: "m19k",
-        text: "Bold text, Some link",
-        type: "unstyled",
-        depth: 0,
-        inlineStyleRanges: [
-          { offset: 0, length: 9, style: "BOLD" },
-          { offset: 11, length: 9, style: "ITALIC" },
-        ],
-        entityRanges: [{ offset: 11, length: 9, key: 0 }],
-        data: {},
-      },
-    ],
-    entityMap: {
-      "0": {
-        type: "LINK",
-        mutability: "MUTABLE",
-        data: {
-          href:
-            "hi>Italic text</a></i><br/ ><br />Other text<br /><br /><a href=",
-          url:
-            "http://0.0.0.0:9000/hi%3EItalic%20text%3C/a%3E%3C/i%3E%3Cbr/%20%3E%3Cbr%20/%3EOther%20text%3Cbr%20/%3E%3Cbr%20/%3E%3Ca%20href=",
-        },
-      },
-    },
-  };
-  const contentState: ContentState = convertFromRaw(a)
-  contentState
+  localStorage.setItem('draftRaw', data);
   console.log(data);
 };
 
 const LoadHTML = () => {
-  return <MUIRichTextEditor defaultValue={content} onSave={save}  readOnly />;
+  return (
+    <>
+      <MUIRichTextEditor defaultValue={content} onSave={save} />
+      <hr></hr>
+      <MUIRichTextEditor
+        defaultValue={initialEditorState}
+        onSave={save}
+        readOnly
+        controls={[]}
+      />
+    </>
+  );
 };
 
 export default LoadHTML;
